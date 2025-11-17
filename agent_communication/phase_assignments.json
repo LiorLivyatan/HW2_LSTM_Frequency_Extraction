@@ -1,0 +1,408 @@
+{
+  "metadata": {
+    "project": "HW2_LSTM_Frequency_Extraction",
+    "created": "2025-11-16",
+    "version": "1.0",
+    "description": "Phase-to-agent mapping for the 6-phase LSTM frequency extraction implementation",
+    "total_phases": 6,
+    "estimated_total_time": "11-18 hours"
+  },
+  "phases": {
+    "phase_1": {
+      "name": "Data Generation",
+      "description": "Generate synthetic signals with 4 frequencies, per-sample randomization, and separate seeds for train/test",
+      "prd_reference": "prd/01_DATA_GENERATION_PRD.md",
+      "estimated_time": "2-3 hours",
+      "complexity": "Medium",
+      "primary_agent": "signal-validation-expert",
+      "backup_agent": "general-purpose",
+      "agent_role": {
+        "signal-validation-expert": {
+          "when_to_invoke": [
+            "After implementing SignalGenerator class",
+            "After generating train_data.npy and test_data.npy",
+            "Before proceeding to Phase 2"
+          ],
+          "expected_tasks": [
+            "Validate per-sample randomization (loop-based, not vectorized)",
+            "Perform FFT analysis to confirm 1Hz, 3Hz, 5Hz, 7Hz frequencies",
+            "Verify seed separation (Seed #1 vs Seed #2)",
+            "Check dataset structure (40,000 rows, correct shape)",
+            "Validate noisy vs clean signal relationships"
+          ],
+          "success_criteria": [
+            "All validation checks PASS",
+            "FFT shows all 4 frequencies with SNR > 10dB",
+            "Train and test noise are uncorrelated (correlation < 0.1)",
+            "Dataset shape matches specification"
+          ]
+        }
+      },
+      "deliverables": [
+        "src/data_generation.py (SignalGenerator class)",
+        "data/train_data.npy (Seed #1)",
+        "data/test_data.npy (Seed #2)",
+        "Validation report from signal-validation-expert"
+      ],
+      "critical_requirements": [
+        "Per-sample randomization: A_i(t) and φ_i(t) vary at EVERY t",
+        "No vectorized amplitude/phase generation",
+        "Exactly 4 frequencies: 1Hz, 3Hz, 5Hz, 7Hz",
+        "Different seeds for train (Seed #1) and test (Seed #2)"
+      ],
+      "dependencies": [],
+      "next_phase": "phase_2"
+    },
+    "phase_2": {
+      "name": "Model Architecture",
+      "description": "Implement FrequencyLSTM class with explicit state management support",
+      "prd_reference": "prd/02_MODEL_ARCHITECTURE_PRD.md",
+      "estimated_time": "1-2 hours",
+      "complexity": "Low",
+      "primary_agent": "general-purpose",
+      "backup_agent": "Explore",
+      "agent_role": {
+        "general-purpose": {
+          "when_to_invoke": [
+            "After implementing FrequencyLSTM class",
+            "Before starting Phase 3 training"
+          ],
+          "expected_tasks": [
+            "Review model architecture implementation",
+            "Test forward pass with dummy data",
+            "Verify input/output shapes",
+            "Check state tensor dimensions",
+            "Validate parameter count"
+          ],
+          "success_criteria": [
+            "Model initializes without errors",
+            "Forward pass works with dummy input",
+            "State shapes match specification",
+            "Input shape: (batch=1, seq=1, features=5)",
+            "Output shape: (batch=1, 1)"
+          ]
+        }
+      },
+      "deliverables": [
+        "src/model.py (FrequencyLSTM class)",
+        "Unit tests for model (tests/test_model.py)",
+        "Model validation report"
+      ],
+      "critical_requirements": [
+        "Support for explicit state input/output",
+        "Input features: 5 (S(t) + 4 one-hot)",
+        "Output: 1 (scalar prediction)",
+        "Hidden size configurable (default: 64)",
+        "PyTorch nn.Module implementation"
+      ],
+      "dependencies": ["phase_1"],
+      "next_phase": "phase_3"
+    },
+    "phase_3": {
+      "name": "Training Pipeline",
+      "description": "Implement L=1 training with state preservation - THE MOST CRITICAL PHASE",
+      "prd_reference": "prd/03_TRAINING_PIPELINE_PRD.md",
+      "estimated_time": "4-6 hours",
+      "complexity": "Very High",
+      "primary_agents": ["lstm-state-debugger", "lstm-training-monitor"],
+      "backup_agent": "general-purpose",
+      "multi_agent_coordination": true,
+      "agent_roles": {
+        "lstm-state-debugger": {
+          "when_to_invoke": [
+            "BEFORE starting first training run (validate setup)",
+            "After implementing StatefulTrainer class",
+            "When encountering memory leaks",
+            "When observing unexpected loss patterns",
+            "After ANY modification to training loop"
+          ],
+          "expected_tasks": [
+            "Verify state detachment pattern (hidden_state.detach() after backward())",
+            "Check state preservation between samples within epoch",
+            "Validate state reset only at epoch boundaries",
+            "Detect memory accumulation issues",
+            "Trace gradient flow correctness"
+          ],
+          "success_criteria": [
+            "State detachment occurs after each backward pass",
+            "States preserved between samples (not reset)",
+            "No memory leaks during 40,000 sample training",
+            "Gradient flow verified",
+            "Training completes without OOM errors"
+          ],
+          "priority": "CRITICAL - Use FIRST before any training"
+        },
+        "lstm-training-monitor": {
+          "when_to_invoke": [
+            "After completing a training epoch",
+            "When loss plateaus or doesn't decrease",
+            "When observing training instability (loss jumps)",
+            "For hyperparameter tuning recommendations",
+            "After full training run for performance analysis"
+          ],
+          "expected_tasks": [
+            "Analyze loss curves (convergence rate, plateaus)",
+            "Detect overfitting/underfitting",
+            "Identify gradient explosion/vanishing",
+            "Recommend hyperparameter adjustments",
+            "Optimize training efficiency"
+          ],
+          "success_criteria": [
+            "Loss decreasing appropriately",
+            "No NaN or Inf values",
+            "Convergence within expected epochs",
+            "Stable gradient norms",
+            "MSE below target threshold"
+          ],
+          "priority": "HIGH - Use during/after training"
+        }
+      },
+      "deliverables": [
+        "src/training.py (StatefulTrainer class)",
+        "src/dataset.py (PyTorch Dataset wrapper)",
+        "models/best_model.pth (trained checkpoint)",
+        "State management validation report (lstm-state-debugger)",
+        "Training performance report (lstm-training-monitor)"
+      ],
+      "critical_requirements": [
+        "L=1 constraint: batch_size=1, seq_len=1",
+        "State preservation: hidden_state flows across samples",
+        "State detachment: detach() after backward() to prevent memory explosion",
+        "DataLoader: shuffle=False, num_workers=0",
+        "Correct state management pattern (see PRD 03)"
+      ],
+      "dependencies": ["phase_1", "phase_2"],
+      "next_phase": "phase_4",
+      "warnings": [
+        "THIS IS THE MOST CRITICAL PHASE - State management is the key pedagogical concept",
+        "ALWAYS use lstm-state-debugger BEFORE training to validate setup",
+        "Memory leaks are common - monitor memory usage closely",
+        "Without proper state detachment, training WILL fail after ~1000 samples"
+      ]
+    },
+    "phase_4": {
+      "name": "Evaluation",
+      "description": "Calculate MSE metrics and verify generalization (MSE_test ≈ MSE_train)",
+      "prd_reference": "prd/04_EVALUATION_PRD.md",
+      "estimated_time": "1-2 hours",
+      "complexity": "Medium",
+      "primary_agent": "lstm-freq-evaluator",
+      "backup_agent": "general-purpose",
+      "agent_role": {
+        "lstm-freq-evaluator": {
+          "when_to_invoke": [
+            "After training completes",
+            "When evaluation metrics are calculated",
+            "To interpret model performance",
+            "For per-frequency analysis",
+            "When deciding if model needs improvement"
+          ],
+          "expected_tasks": [
+            "Analyze MSE_train and MSE_test",
+            "Check generalization ratio: 0.90 ≤ (MSE_test/MSE_train) ≤ 1.10",
+            "Perform per-frequency MSE analysis",
+            "Identify problematic frequencies (MSE > 1.5× mean)",
+            "Provide improvement recommendations"
+          ],
+          "success_criteria": [
+            "Generalization threshold PASSED",
+            "MSE_test ≈ MSE_train (within 10%)",
+            "Overall MSE < 0.01 (ideally < 0.001)",
+            "All frequencies extracted with reasonable quality",
+            "No severe overfitting detected"
+          ]
+        }
+      },
+      "deliverables": [
+        "src/evaluation.py (Evaluator class)",
+        "outputs/metrics.json (MSE values)",
+        "outputs/predictions.npz (model predictions)",
+        "Performance evaluation report (lstm-freq-evaluator)"
+      ],
+      "critical_requirements": [
+        "MSE_train on training set (Seed #1)",
+        "MSE_test on test set (Seed #2)",
+        "Per-frequency MSE for all 4 frequencies",
+        "Generalization check: |MSE_test - MSE_train| / MSE_train < 10%",
+        "Prove model learned frequencies, not noise"
+      ],
+      "dependencies": ["phase_3"],
+      "next_phase": "phase_5"
+    },
+    "phase_5": {
+      "name": "Visualization",
+      "description": "Create publication-quality graphs showing extraction results",
+      "prd_reference": "prd/05_VISUALIZATION_PRD.md",
+      "estimated_time": "2-3 hours",
+      "complexity": "Low",
+      "primary_agent": "general-purpose",
+      "backup_agent": "Explore",
+      "agent_role": {
+        "general-purpose": {
+          "when_to_invoke": [
+            "After implementing Visualizer class",
+            "After generating graphs",
+            "To review graph quality"
+          ],
+          "expected_tasks": [
+            "Review graph implementations",
+            "Verify Graph 1 (single frequency comparison)",
+            "Verify Graph 2 (all 4 frequencies, 2×2 grid)",
+            "Check graph uses test set data",
+            "Validate formatting and clarity"
+          ],
+          "success_criteria": [
+            "Graph 1 shows Target vs LSTM vs Noisy for f₂=3Hz",
+            "Graph 2 shows all 4 frequencies in 2×2 layout",
+            "Both graphs use test set (Seed #2)",
+            "Clear labels, legends, and titles",
+            "PNG format, 300 DPI"
+          ]
+        }
+      },
+      "deliverables": [
+        "src/visualization.py (Visualizer class)",
+        "outputs/graphs/frequency_comparison.png (Graph 1)",
+        "outputs/graphs/all_frequencies.png (Graph 2)",
+        "Visualization review report"
+      ],
+      "critical_requirements": [
+        "Graph 1: f₂ (3Hz), first 1 second, Target vs LSTM vs Noisy",
+        "Graph 2: All 4 frequencies, 2×2 subplots, Target vs LSTM",
+        "Use TEST set data (Seed #2) to show generalization",
+        "Matplotlib implementation",
+        "High-quality output (300 DPI PNG)"
+      ],
+      "dependencies": ["phase_4"],
+      "next_phase": "phase_6"
+    },
+    "phase_6": {
+      "name": "Integration",
+      "description": "Build end-to-end pipeline with CLI orchestration",
+      "prd_reference": "prd/06_INTEGRATION_PRD.md",
+      "estimated_time": "1-2 hours",
+      "complexity": "Low",
+      "primary_agent": "general-purpose",
+      "backup_agent": "Plan",
+      "agent_role": {
+        "general-purpose": {
+          "when_to_invoke": [
+            "After implementing main.py",
+            "After creating config.yaml",
+            "To test end-to-end pipeline",
+            "Before final submission"
+          ],
+          "expected_tasks": [
+            "Review main.py orchestration",
+            "Test CLI modes (train, eval, viz, all)",
+            "Validate config.yaml structure",
+            "Check requirements.txt completeness",
+            "Review README.md documentation"
+          ],
+          "success_criteria": [
+            "python main.py --mode all works end-to-end",
+            "All CLI modes functional",
+            "Configuration properly loaded",
+            "Documentation complete",
+            "Project ready for submission"
+          ]
+        }
+      },
+      "deliverables": [
+        "main.py (orchestration script)",
+        "config.yaml (all hyperparameters)",
+        "requirements.txt (dependencies)",
+        "README.md (usage documentation)",
+        "Integration testing report"
+      ],
+      "critical_requirements": [
+        "CLI with argparse: --mode train|eval|viz|all",
+        "Config loading from config.yaml",
+        "Proper error handling",
+        "Logging to files",
+        "Complete end-to-end pipeline"
+      ],
+      "dependencies": ["phase_1", "phase_2", "phase_3", "phase_4", "phase_5"],
+      "next_phase": null
+    }
+  },
+  "agent_coordination_matrix": {
+    "description": "Which agents work together and when",
+    "phase_3_coordination": {
+      "agents": ["lstm-state-debugger", "lstm-training-monitor"],
+      "sequence": [
+        {
+          "step": 1,
+          "agent": "lstm-state-debugger",
+          "action": "Validate training loop implementation BEFORE first run"
+        },
+        {
+          "step": 2,
+          "agent": "general-purpose",
+          "action": "Execute first training epoch"
+        },
+        {
+          "step": 3,
+          "agent": "lstm-training-monitor",
+          "action": "Analyze initial training performance"
+        },
+        {
+          "step": 4,
+          "agent": "general-purpose",
+          "action": "Apply recommended changes and continue training"
+        },
+        {
+          "step": 5,
+          "agent": "lstm-state-debugger",
+          "action": "Re-validate if memory issues occur"
+        },
+        {
+          "step": 6,
+          "agent": "lstm-training-monitor",
+          "action": "Final analysis after training completes"
+        }
+      ],
+      "notes": "Phase 3 requires tight coordination. Always use lstm-state-debugger FIRST to prevent catastrophic state management bugs."
+    }
+  },
+  "progress_tracking": {
+    "current_phase": "phase_2",
+    "completed_phases": ["phase_1"],
+    "phase_status": {
+      "phase_1": "completed",
+      "phase_2": "in_progress",
+      "phase_3": "not_started",
+      "phase_4": "not_started",
+      "phase_5": "not_started",
+      "phase_6": "not_started"
+    },
+    "last_updated": "2025-11-16"
+  },
+  "usage_guidelines": {
+    "before_starting_phase": [
+      "Read the phase-specific PRD",
+      "Check dependencies are complete",
+      "Review agent role and expected tasks",
+      "Prepare task description for agent"
+    ],
+    "during_phase": [
+      "Invoke primary agent for specialized tasks",
+      "Use backup agent for general development",
+      "Monitor agent reports for issues",
+      "Update progress tracking"
+    ],
+    "after_completing_phase": [
+      "Review agent reports",
+      "Create handoff document",
+      "Update phase_status to 'completed'",
+      "Verify deliverables exist"
+    ],
+    "agent_selection_priority": [
+      "1. Use custom agents for their specialized phases",
+      "2. Use system agents for general tasks",
+      "3. Prefer 'Explore' for quick searches",
+      "4. Prefer 'Plan' for research-only tasks",
+      "5. Use 'general-purpose' as default"
+    ]
+  }
+}

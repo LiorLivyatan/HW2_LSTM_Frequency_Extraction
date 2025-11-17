@@ -1,0 +1,65 @@
+{
+  "_comment": "This is a TEMPLATE for lstm-state-debugger agent reports. Copy and fill in actual values.",
+  "agent_name": "lstm-state-debugger",
+  "phase": "Phase 3",
+  "execution_timestamp": "YYYY-MM-DDTHH:MM:SSZ",
+  "task_description": "Brief description of state management debugging task",
+  "status": "COMPLETED|IN_PROGRESS|FAILED|BLOCKED",
+  "findings": {
+    "state_detachment": {
+      "status": "PASS|FAIL",
+      "hidden_state_detached": "boolean",
+      "cell_state_detached": "boolean",
+      "detachment_location": "file.py:line",
+      "pattern_correct": "boolean"
+    },
+    "state_preservation": {
+      "status": "PASS|FAIL",
+      "preserved_between_samples": "boolean",
+      "reset_only_at_epoch_start": "boolean",
+      "state_flow_verified": "boolean"
+    },
+    "memory_management": {
+      "status": "PASS|FAIL",
+      "memory_leak_detected": "boolean",
+      "computation_graph_accumulation": "boolean",
+      "expected_memory_growth": "stable|linear|exponential"
+    },
+    "gradient_flow": {
+      "status": "PASS|FAIL",
+      "gradients_flow_correctly": "boolean",
+      "gradient_accumulation_prevented": "boolean"
+    },
+    "training_stability": {
+      "status": "PASS|FAIL",
+      "state_dimensions_consistent": "boolean",
+      "no_nan_in_states": "boolean"
+    }
+  },
+  "critical_issues": [
+    "List any blocking state management issues (empty if none)"
+  ],
+  "memory_implications": {
+    "current_pattern": "description of current implementation",
+    "memory_impact": "stable|grows linearly|grows exponentially",
+    "estimated_40k_samples": "safe|will OOM"
+  },
+  "code_issues": [
+    {
+      "issue_id": "STATE-001",
+      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+      "location": "file.py:line",
+      "problem": "description",
+      "fix": "specific code change"
+    }
+  ],
+  "recommendations": [
+    "Specific fixes with code examples",
+    "Can include 'State management validated - safe to proceed' if all checks pass"
+  ],
+  "artifacts_validated": [
+    "src/training.py"
+  ],
+  "next_agent": "lstm-training-monitor|None",
+  "execution_duration": "X minutes"
+}

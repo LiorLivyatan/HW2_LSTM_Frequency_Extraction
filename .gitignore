@@ -46,6 +46,9 @@ outputs/
 logs/
 *.log
 
+# Agent communication logs (exclude from version control)
+agent_communication/logs/*.log
+
 # IDE
 .vscode/
 .idea/

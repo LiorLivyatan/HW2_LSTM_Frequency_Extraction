@@ -1,0 +1,27 @@
+# LSTM Frequency Extraction - Python Dependencies
+# Installation: pip install -r requirements.txt
+
+# Core Framework
+torch>=2.0.0           # PyTorch for LSTM implementation (CRITICAL: explicit state control)
+numpy>=1.24.0          # Signal generation and data handling
+
+# Visualization
+matplotlib>=3.7.0      # Scientific plotting for graphs
+
+# Signal Processing
+scipy>=1.10.0          # FFT analysis for validation
+
+# Configuration
+pyyaml>=6.0            # YAML configuration file loading
+
+# Progress Bars
+tqdm>=4.65.0           # Training progress visualization
+
+# Testing (optional but recommended)
+pytest>=7.3.0          # Unit testing framework
+pytest-cov>=4.1.0      # Test coverage reporting
+
+# Development Tools (optional)
+black>=23.0.0          # Code formatting
+flake8>=6.0.0          # Linting
+mypy>=1.3.0            # Type checking

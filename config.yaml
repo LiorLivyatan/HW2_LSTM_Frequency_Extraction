@@ -1,0 +1,48 @@
+# LSTM Frequency Extraction Configuration
+# This configuration file controls all hyperparameters and paths for the pipeline
+
+# Data Generation
+data:
+  frequencies: [1, 3, 5, 7]  # Hz - the 4 frequencies to extract
+  sampling_rate: 1000         # Hz - 1000 samples per second
+  duration: 10.0              # seconds - 10 seconds of signal
+  train_seed: 1               # Random seed for training set
+  test_seed: 2                # Random seed for test set (different noise)
+  data_dir: "data"
+
+# Model Architecture
+model:
+  input_size: 5               # S(t) + 4-dim one-hot selector
+  hidden_size: 128            # LSTM hidden dimension (doubled from 64 for capacity)
+  num_layers: 1               # Single LSTM layer
+  dropout: 0.0                # No dropout for single layer
+
+# Training
+training:
+  learning_rate: 0.0001       # Adam learning rate (reduced from 0.001)
+  num_epochs: 100             # Training epochs
+  batch_size: 1               # CRITICAL: Must be 1 for L=1 constraint
+  clip_grad_norm: 1.0         # Gradient clipping for stability
+  device: "auto"              # auto, cpu, or cuda
+  save_dir: "models"
+
+# Evaluation
+evaluation:
+  generalization_threshold: 0.1  # 10% - maximum acceptable difference between train/test MSE
+
+# Visualization
+visualization:
+  comparison_freq_idx: 1      # f₂ = 3Hz (0-indexed)
+  time_window: 1000           # First 1 second (1000 samples)
+  dpi: 300                    # Publication quality
+  output_dir: "outputs/graphs"
+
+# Paths
+paths:
+  train_data: "data/train_data.npy"
+  test_data: "data/test_data.npy"
+  model_checkpoint: "models/best_model.pth"
+  metrics: "outputs/metrics.json"
+  predictions: "outputs/predictions.npz"
+  training_history: "models/training_history.json"
+  log_file: "logs/lstm_extraction.log"
