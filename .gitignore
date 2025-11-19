@@ -23,31 +23,9 @@ wheels/
 .installed.cfg
 *.egg
 
-# PyTorch
-# *.pth
-# *.pt
-# *.ckpt
-# checkpoints/
-
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
-
-# Data files (large binary files)
-# *.npy
-# *.npz
-# data/
-
-# Model outputs
-# models/
-# outputs/
-
-# Logs
-# logs/
-# *.log
-
-# Agent communication logs (exclude from version control)
-# agent_communication/logs/*.log
 
 # IDE
 .vscode/
