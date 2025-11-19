@@ -40,17 +40,17 @@ class FrequencyLSTM(nn.Module):
     LSTM states explicitly, allowing state preservation across individual samples.
 
     Args:
-        input_size (int): Size of input features. Default: 5
-            [S(t), C1, C2, C3, C4]
-        hidden_size (int): Number of LSTM hidden units. Default: 128
+        input_size (int): Size of input features.
+            [S(t), C1, C2, C3, C4] - typically 5 for 4 frequencies
+        hidden_size (int): Number of LSTM hidden units.
             Tunable options: [32, 64, 128, 256]
-        num_layers (int): Number of LSTM layers. Default: 1
+        num_layers (int): Number of LSTM layers.
             Tunable options: [1, 2, 3, 4, ...]
-        dropout (float): Dropout probability between LSTM layers. Default: 0.0
+        dropout (float): Dropout probability between LSTM layers.
             Only applied if num_layers > 1
 
     Example:
-        >>> model = FrequencyLSTM(hidden_size=128, num_layers=1)
+        >>> model = FrequencyLSTM(input_size=5, hidden_size=128, num_layers=1)
         >>> x = torch.randn(1, 1, 5)  # (batch=1, seq=1, features=5)
         >>> output, hidden = model(x)
         >>> print(output.shape)  # torch.Size([1, 1])
@@ -293,12 +293,12 @@ def main():
     print("=" * 70)
     print()
 
-    # Create model
     print("Creating model...")
     model = FrequencyLSTM(
         input_size=5,
         hidden_size=128,
-        num_layers=1
+        num_layers=1,
+        dropout=0.0
     )
 
     print(model.get_model_summary())

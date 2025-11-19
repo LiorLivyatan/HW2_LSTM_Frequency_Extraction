@@ -35,10 +35,10 @@ class SignalGenerator:
 
     Example:
         >>> # Generate training dataset
-        >>> gen = SignalGenerator(seed=1)
+        >>> gen = SignalGenerator(frequencies=[1,3,5,7], fs=1000, duration=10.0, seed=1)
         >>> gen.save_dataset('data/train_data.npy')
         >>> # Generate test dataset
-        >>> gen = SignalGenerator(seed=2)
+        >>> gen = SignalGenerator(frequencies=[1,3,5,7], fs=1000, duration=10.0, seed=2)
         >>> gen.save_dataset('data/test_data.npy')
     """
 

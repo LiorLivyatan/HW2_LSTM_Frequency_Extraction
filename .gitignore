@@ -23,31 +23,9 @@ wheels/
 .installed.cfg
 *.egg
 
-# PyTorch
-# *.pth
-# *.pt
-# *.ckpt
-# checkpoints/
-
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
-
-# Data files (large binary files)
-# *.npy
-# *.npz
-# data/
-
-# Model outputs
-# models/
-# outputs/
-
-# Logs
-# logs/
-# *.log
-
-# Agent communication logs (exclude from version control)
-# agent_communication/logs/*.log
 
 # IDE
 .vscode/
@@ -68,3 +46,15 @@ htmlcov/
 # Environment
 .env
 .envrc
+
+# Logs
+*.log
+logs/
+
+# Large model files (optional - uncomment if models are too large)
+# models/*.pth
+# models/*.pt
+
+# Generated outputs (optional - uncomment if you don't want to track outputs)
+# outputs/
+# data/

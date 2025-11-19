@@ -1,0 +1,272 @@
+[
+  {
+    "id": 1,
+    "name": "Baseline",
+    "description": "Current baseline configuration",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 1,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.2296038568019867,
+      "test_mse": 0.22934117913246155,
+      "generalization_diff": 0.00114404724445194,
+      "best_epoch": 20,
+      "final_loss": 0.08368750206134282,
+      "per_frequency_test": {
+        "1Hz": 0.1783091127872467,
+        "3Hz": 0.4973786473274231,
+        "5Hz": 0.21197311580181122,
+        "7Hz": 0.029703833162784576
+      }
+    },
+    "training_time": 24.276476860046387,
+    "total_parameters": 69249
+  },
+  {
+    "id": 2,
+    "name": "Small Hidden",
+    "description": "Reduced hidden size for comparison",
+    "config": {
+      "hidden_size": 64,
+      "num_layers": 1,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.16014662384986877,
+      "test_mse": 0.15925036370754242,
+      "generalization_diff": 0.005596497096121311,
+      "best_epoch": 20,
+      "final_loss": 0.1176550419767853,
+      "per_frequency_test": {
+        "1Hz": 0.03460754081606865,
+        "3Hz": 0.22246357798576355,
+        "5Hz": 0.18394772708415985,
+        "7Hz": 0.19598263502120972
+      }
+    },
+    "training_time": 12.085507869720459,
+    "total_parameters": 18241
+  },
+  {
+    "id": 3,
+    "name": "Large Hidden",
+    "description": "Increased hidden size for more capacity",
+    "config": {
+      "hidden_size": 256,
+      "num_layers": 1,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.18488626182079315,
+      "test_mse": 0.18531276285648346,
+      "generalization_diff": 0.0023068292066454887,
+      "best_epoch": 20,
+      "final_loss": 0.06768142313901335,
+      "per_frequency_test": {
+        "1Hz": 0.03965345397591591,
+        "3Hz": 0.16097392141819,
+        "5Hz": 0.41155216097831726,
+        "7Hz": 0.12907148897647858
+      }
+    },
+    "training_time": 32.156949043273926,
+    "total_parameters": 269569
+  },
+  {
+    "id": 4,
+    "name": "2-Layer LSTM",
+    "description": "Two stacked LSTM layers",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 2,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.14929772913455963,
+      "test_mse": 0.14906428754329681,
+      "generalization_diff": 0.0015635977033525705,
+      "best_epoch": 20,
+      "final_loss": 0.10207497877399437,
+      "per_frequency_test": {
+        "1Hz": 0.06058242917060852,
+        "3Hz": 0.22321099042892456,
+        "5Hz": 0.2748611867427826,
+        "7Hz": 0.037602558732032776
+      }
+    },
+    "training_time": 41.73733925819397,
+    "total_parameters": 201345
+  },
+  {
+    "id": 5,
+    "name": "3-Layer LSTM",
+    "description": "Three stacked LSTM layers",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 3,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.24589182436466217,
+      "test_mse": 0.24573197960853577,
+      "generalization_diff": 0.0006500612944364548,
+      "best_epoch": 17,
+      "final_loss": 0.11986547414701199,
+      "per_frequency_test": {
+        "1Hz": 0.07502511888742447,
+        "3Hz": 0.14548861980438232,
+        "5Hz": 0.4710376560688019,
+        "7Hz": 0.2913765013217926
+      }
+    },
+    "training_time": 65.2913110256195,
+    "total_parameters": 333441
+  },
+  {
+    "id": 6,
+    "name": "Higher LR",
+    "description": "Higher learning rate (10x baseline)",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 1,
+      "learning_rate": 0.001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.026082869619131088,
+      "test_mse": 0.025407589972019196,
+      "generalization_diff": 0.025889776647090912,
+      "best_epoch": 16,
+      "final_loss": 0.03262035397759173,
+      "per_frequency_test": {
+        "1Hz": 0.03008444607257843,
+        "3Hz": 0.03846605122089386,
+        "5Hz": 0.024491218850016594,
+        "7Hz": 0.00858863815665245
+      }
+    },
+    "training_time": 21.444223165512085,
+    "total_parameters": 69249
+  },
+  {
+    "id": 7,
+    "name": "Lower LR",
+    "description": "Lower learning rate (0.1x baseline)",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 1,
+      "learning_rate": 1e-05,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.41261762380599976,
+      "test_mse": 0.41257840394973755,
+      "generalization_diff": 9.505133493803442e-05,
+      "best_epoch": 20,
+      "final_loss": 0.41723238710928706,
+      "per_frequency_test": {
+        "1Hz": 0.306995689868927,
+        "3Hz": 0.41555672883987427,
+        "5Hz": 0.4560042917728424,
+        "7Hz": 0.47175702452659607
+      }
+    },
+    "training_time": 20.356418132781982,
+    "total_parameters": 69249
+  },
+  {
+    "id": 8,
+    "name": "Large + 2-Layer",
+    "description": "Large hidden size with 2 layers",
+    "config": {
+      "hidden_size": 256,
+      "num_layers": 2,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.2595730125904083,
+      "test_mse": 0.2601536512374878,
+      "generalization_diff": 0.00223689922131598,
+      "best_epoch": 15,
+      "final_loss": 0.13525278410937172,
+      "per_frequency_test": {
+        "1Hz": 0.196649432182312,
+        "3Hz": 0.3569910526275635,
+        "5Hz": 0.4209437072277069,
+        "7Hz": 0.0660303607583046
+      }
+    },
+    "training_time": 67.87704682350159,
+    "total_parameters": 795905
+  },
+  {
+    "id": 9,
+    "name": "Optimal Candidate",
+    "description": "Best combination candidate",
+    "config": {
+      "hidden_size": 256,
+      "num_layers": 2,
+      "learning_rate": 0.001,
+      "num_epochs": 20,
+      "batch_size": 32
+    },
+    "metrics": {
+      "train_mse": 0.6878082752227783,
+      "test_mse": 0.6876872777938843,
+      "generalization_diff": 0.00017591737559996545,
+      "best_epoch": 18,
+      "final_loss": 0.23860429773139769,
+      "per_frequency_test": {
+        "1Hz": 0.8682183623313904,
+        "3Hz": 0.8860883712768555,
+        "5Hz": 0.9108677506446838,
+        "7Hz": 0.0855749174952507
+      }
+    },
+    "training_time": 67.72518014907837,
+    "total_parameters": 795905
+  },
+  {
+    "id": 10,
+    "name": "Large Batch",
+    "description": "Larger batch size",
+    "config": {
+      "hidden_size": 128,
+      "num_layers": 1,
+      "learning_rate": 0.0001,
+      "num_epochs": 20,
+      "batch_size": 64
+    },
+    "metrics": {
+      "train_mse": 0.19094407558441162,
+      "test_mse": 0.19093407690525055,
+      "generalization_diff": 5.236443757894449e-05,
+      "best_epoch": 20,
+      "final_loss": 0.20171667869407683,
+      "per_frequency_test": {
+        "1Hz": 0.09466971457004547,
+        "3Hz": 0.11570445448160172,
+        "5Hz": 0.30186522006988525,
+        "7Hz": 0.2514968812465668
+      }
+    },
+    "training_time": 12.095541954040527,
+    "total_parameters": 69249
+  }
+]

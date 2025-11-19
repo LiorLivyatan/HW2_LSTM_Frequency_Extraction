@@ -1,5 +1,6 @@
 # LSTM Frequency Extraction Configuration
 # This configuration file controls all hyperparameters and paths for the pipeline
+# See CONFIG.md for detailed parameter documentation
 
 # Data Generation
 data:
