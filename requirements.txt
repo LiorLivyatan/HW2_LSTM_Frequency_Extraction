@@ -21,6 +21,14 @@ tqdm>=4.65.0           # Training progress visualization
 pytest>=7.3.0          # Unit testing framework
 pytest-cov>=4.1.0      # Test coverage reporting
 
+# UI and Dashboard
+streamlit>=1.37.0      # Interactive dashboard
+plotly>=5.15.0         # Dynamic plotting
+pandas>=2.0.0          # Data manipulation for UI
+
+# Utilities
+python-dotenv>=1.0.0   # Environment variable management
+
 # Development Tools (optional)
 black>=23.0.0          # Code formatting
 flake8>=6.0.0          # Linting

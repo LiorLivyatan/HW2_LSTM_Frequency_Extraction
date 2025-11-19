@@ -1,4 +1,8 @@
-# LSTM Frequency Extraction from Noisy Mixed Signals
+# LSTM Frequency Extraction
+
+> **🚀 New Quick Start:** Run `./setup_and_run.sh` to automatically set up the environment, install dependencies, and launch the full pipeline with the new interactive UI!
+
+## Project Overviewsy Mixed Signals
 
 **M.Sc. Computer Science - Deep Learning Assignment**
 **Conditional Regression with Recurrent Neural Networks**
@@ -1402,7 +1406,22 @@ streamlit run src/ui/dashboard.py
 
 ## Usage
 
-### Installation
+### Quick Start (Recommended)
+
+We provide a comprehensive startup script that handles environment setup, dependency installation, and pipeline execution:
+
+```bash
+./setup_and_run.sh
+```
+
+This script will:
+1. Create a virtual environment (`.venv`) if it doesn't exist.
+2. Activate the environment.
+3. Install all required dependencies.
+4. Run the full pipeline (Data -> Train -> Eval -> Viz).
+5. Launch the Streamlit UI automatically.
+
+### Prerequisites (Manual Setup)
 
 ```bash
 # Clone repository
