@@ -29,8 +29,16 @@ import logging
 import yaml
 import torch
 import numpy as np
+import os
 from pathlib import Path
 from datetime import datetime
+
+# Optional: load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system environment variables only
 
 # Import all pipeline components
 from src.data_generation import SignalGenerator
@@ -75,6 +83,74 @@ def load_config(config_path: str = 'config.yaml') -> dict:
     """
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
+    return config
+
+
+def apply_environment_overrides(config: dict) -> dict:
+    """
+    Apply environment variable overrides to configuration.
+
+    Environment variables take precedence over config.yaml values.
+    See .env.example for available variables.
+
+    Args:
+        config: Configuration dictionary from YAML file
+
+    Returns:
+        dict: Configuration with environment overrides applied
+    """
+    # Device configuration
+    if os.getenv('LSTM_DEVICE'):
+        config['training']['device'] = os.getenv('LSTM_DEVICE')
+
+    # Directory paths
+    if os.getenv('LSTM_DATA_DIR'):
+        config['data']['data_dir'] = os.getenv('LSTM_DATA_DIR')
+        # Update related paths
+        data_dir = os.getenv('LSTM_DATA_DIR')
+        config['paths']['train_data'] = f"{data_dir}/train_data.npy"
+        config['paths']['test_data'] = f"{data_dir}/test_data.npy"
+
+    if os.getenv('LSTM_MODEL_DIR'):
+        config['training']['save_dir'] = os.getenv('LSTM_MODEL_DIR')
+        model_dir = os.getenv('LSTM_MODEL_DIR')
+        config['paths']['model_checkpoint'] = f"{model_dir}/best_model.pth"
+        config['paths']['training_history'] = f"{model_dir}/training_history.json"
+
+    if os.getenv('LSTM_OUTPUT_DIR'):
+        output_dir = os.getenv('LSTM_OUTPUT_DIR')
+        config['paths']['metrics'] = f"{output_dir}/metrics.json"
+        config['paths']['predictions'] = f"{output_dir}/predictions.npz"
+        config['visualization']['output_dir'] = f"{output_dir}/graphs"
+
+    if os.getenv('LSTM_LOG_DIR'):
+        log_dir = os.getenv('LSTM_LOG_DIR')
+        config['paths']['log_file'] = f"{log_dir}/lstm_extraction.log"
+
+    # Training configuration overrides
+    if os.getenv('LSTM_NUM_EPOCHS'):
+        config['training']['num_epochs'] = int(os.getenv('LSTM_NUM_EPOCHS'))
+
+    if os.getenv('LSTM_BATCH_SIZE'):
+        config['training']['batch_size'] = int(os.getenv('LSTM_BATCH_SIZE'))
+
+    if os.getenv('LSTM_LEARNING_RATE'):
+        config['training']['learning_rate'] = float(os.getenv('LSTM_LEARNING_RATE'))
+
+    # Model configuration overrides
+    if os.getenv('LSTM_HIDDEN_SIZE'):
+        config['model']['hidden_size'] = int(os.getenv('LSTM_HIDDEN_SIZE'))
+
+    if os.getenv('LSTM_NUM_LAYERS'):
+        config['model']['num_layers'] = int(os.getenv('LSTM_NUM_LAYERS'))
+
+    # Data generation overrides
+    if os.getenv('LSTM_TRAIN_SEED'):
+        config['data']['train_seed'] = int(os.getenv('LSTM_TRAIN_SEED'))
+
+    if os.getenv('LSTM_TEST_SEED'):
+        config['data']['test_seed'] = int(os.getenv('LSTM_TEST_SEED'))
+
     return config
 
 
@@ -295,15 +371,23 @@ def phase_visualization(config: dict):
     logging.info("PHASE 5: Visualization")
     logging.info("=" * 70)
 
+    viz_config = config['visualization']
+
     # Create visualizer
     visualizer = Visualizer(
         predictions_path=config['paths']['predictions'],
-        data_path=config['paths']['test_data']
+        data_path=config['paths']['test_data'],
+        training_history_path=config['paths']['training_history'],
+        metrics_path=config['paths']['metrics'],
+        train_data_path=config['paths']['train_data']
     )
 
     # Create graphs
     visualizer.create_all_visualizations(
-        output_dir=config['visualization']['output_dir']
+        output_dir=viz_config['output_dir'],
+        freq_idx=viz_config.get('comparison_freq_idx', 1),
+        time_window=viz_config.get('time_window', 1000),
+        dpi=viz_config.get('dpi', 300)
     )
 
     logging.info("✓ Visualization complete\n")
@@ -362,7 +446,15 @@ Examples:
     # Load configuration
     config = load_config(args.config)
 
-    # Setup logging
+    # Apply environment variable overrides
+    config = apply_environment_overrides(config)
+
+    # Check for verbose override from environment
+    if os.getenv('LSTM_VERBOSE', '').lower() in ('true', '1', 'yes'):
+        args.verbose = True
+
+    # Setup logging with optional environment override
+    log_level = os.getenv('LSTM_LOG_LEVEL', 'INFO')
     setup_logging(config['paths']['log_file'], args.verbose)
 
     # Print header
