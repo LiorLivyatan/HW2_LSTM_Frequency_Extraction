@@ -37,8 +37,9 @@
    - [Error Analysis](#error-analysis)
    - [Signal Processing Validation](#signal-processing-validation)
 8. [Implementation Details](#implementation-details)
-9. [Usage](#usage)
-10. [References](#references)
+9. [Visualization UI](#visualization-ui)
+10. [Usage](#usage)
+11. [References](#references)
 
 ---
 
@@ -1276,6 +1277,34 @@ data:
   duration: 10                     # seconds
   amplitude_range: [0.8, 1.2]
   phase_multiplier: 0.01           # Phase variation = 0.01 × 2π
+```
+
+---
+
+## Visualization UI
+
+A Streamlit-based dashboard is available to interactively explore the model's performance and predictions.
+
+### Features
+- **Model Performance**: View Train/Test MSE and generalization metrics.
+- **Training History**: Visualize loss curves over epochs.
+- **Signal Analysis**: Interactively inspect noisy inputs, clean targets, and model predictions.
+
+### How to Run
+
+**Option 1: Using the automation script (Recommended)**
+```bash
+./scripts/run_ui.sh
+```
+
+**Option 2: Using main.py**
+```bash
+python main.py --mode ui
+```
+
+**Option 3: Directly with Streamlit**
+```bash
+streamlit run src/ui/dashboard.py
 ```
 
 ---
