@@ -4,6 +4,10 @@ Model Architecture Module for LSTM Frequency Extraction
 This module implements the FrequencyLSTM class - a PyTorch LSTM model that performs
 conditional regression to extract individual frequency components from mixed noisy signals.
 
+IMPORTANT: L=1 refers to sequence_length=1 (processing one time point per forward pass),
+NOT num_layers=1. The num_layers parameter (number of stacked LSTM layers) is fully
+experimentally tunable.
+
 Critical Design Choices:
     - PyTorch LSTM: Enables explicit state management required for L=1 training
     - batch_first=True: Convenient (batch, seq, features) input format
@@ -38,25 +42,25 @@ class FrequencyLSTM(nn.Module):
     Args:
         input_size (int): Size of input features. Default: 5
             [S(t), C1, C2, C3, C4]
-        hidden_size (int): Number of LSTM hidden units. Default: 64
+        hidden_size (int): Number of LSTM hidden units. Default: 128
             Tunable options: [32, 64, 128, 256]
         num_layers (int): Number of LSTM layers. Default: 1
-            Tunable options: [1, 2, 3]
+            Tunable options: [1, 2, 3, 4, ...]
         dropout (float): Dropout probability between LSTM layers. Default: 0.0
             Only applied if num_layers > 1
 
     Example:
-        >>> model = FrequencyLSTM(hidden_size=64, num_layers=1)
+        >>> model = FrequencyLSTM(hidden_size=128, num_layers=1)
         >>> x = torch.randn(1, 1, 5)  # (batch=1, seq=1, features=5)
         >>> output, hidden = model(x)
         >>> print(output.shape)  # torch.Size([1, 1])
-        >>> print(hidden[0].shape)  # torch.Size([1, 1, 64])
+        >>> print(hidden[0].shape)  # torch.Size([1, 1, 128])
     """
 
     def __init__(
         self,
         input_size: int = 5,
-        hidden_size: int = 64,
+        hidden_size: int = 128,
         num_layers: int = 1,
         dropout: float = 0.0
     ):
@@ -152,7 +156,7 @@ class FrequencyLSTM(nn.Module):
         but reset at epoch boundaries.
 
         Args:
-            batch_size: Batch size (typically 1 for L=1 training)
+            batch_size: Batch size (e.g., 1 for sequential, 32 for parallel batches)
             device: Device to create tensors on. If None, uses CPU
 
         Returns:
@@ -162,8 +166,8 @@ class FrequencyLSTM(nn.Module):
 
         Example:
             >>> model = FrequencyLSTM()
-            >>> h_0, c_0 = model.init_hidden(batch_size=1)
-            >>> print(h_0.shape)  # torch.Size([1, 1, 64])
+            >>> h_0, c_0 = model.init_hidden(batch_size=32)
+            >>> print(h_0.shape)  # torch.Size([1, 32, 128])
         """
         if device is None:
             device = torch.device('cpu')
@@ -182,6 +186,47 @@ class FrequencyLSTM(nn.Module):
         )
         return (h_0, c_0)
 
+    def get_or_reset_hidden(
+        self,
+        current_batch_size: int,
+        expected_batch_size: int,
+        hidden: Optional[Tuple[torch.Tensor, torch.Tensor]],
+        device: torch.device
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Get existing hidden state or reset if batch size doesn't match.
+
+        This handles variable batch sizes (e.g., when the last batch is smaller).
+        If the current batch size doesn't match the expected size, we reinitialize
+        the hidden state with the correct dimensions.
+
+        Args:
+            current_batch_size: Size of the current batch
+            expected_batch_size: Expected batch size
+            hidden: Existing hidden state tuple (h, c), or None
+            device: Device to create tensors on
+
+        Returns:
+            tuple: (h, c) with correct batch dimensions
+
+        Example:
+            >>> model = FrequencyLSTM()
+            >>> # Normal batch (32 samples)
+            >>> h = model.get_or_reset_hidden(32, 32, existing_hidden, device)
+            >>> # Last batch (16 samples) - will reinitialize
+            >>> h = model.get_or_reset_hidden(16, 32, existing_hidden, device)
+        """
+        # If no hidden state exists, initialize new one
+        if hidden is None:
+            return self.init_hidden(current_batch_size, device)
+
+        # If batch size matches, return existing state
+        if current_batch_size == expected_batch_size:
+            return hidden
+
+        # Batch size changed (e.g., last batch is smaller), reinitialize
+        return self.init_hidden(current_batch_size, device)
+
     def count_parameters(self) -> int:
         """
         Count total number of trainable parameters in the model.
@@ -190,9 +235,9 @@ class FrequencyLSTM(nn.Module):
             int: Total number of trainable parameters
 
         Example:
-            >>> model = FrequencyLSTM(hidden_size=64, num_layers=1)
+            >>> model = FrequencyLSTM(hidden_size=128, num_layers=1)
             >>> print(f"Parameters: {model.count_parameters():,}")
-            Parameters: 17,985
+            Parameters: 67,713
         """
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
@@ -252,7 +297,7 @@ def main():
     print("Creating model...")
     model = FrequencyLSTM(
         input_size=5,
-        hidden_size=64,
+        hidden_size=128,
         num_layers=1
     )
 

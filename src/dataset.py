@@ -4,6 +4,9 @@ Dataset Module for LSTM Frequency Extraction
 This module provides the PyTorch Dataset wrapper for loading and serving
 the frequency extraction data generated in Phase 1.
 
+This dataset is designed for L=1 training (sequence_length=1), where each sample
+represents a single time point processed individually.
+
 Reference: prd/03_TRAINING_PIPELINE_PRD.md
 """
 
@@ -177,13 +180,13 @@ def main():
     print()
 
     # Test with DataLoader (L=1 configuration)
-    print("Testing with DataLoader (L=1 configuration):")
+    print("Testing with DataLoader (L=1 with batch_size=32):")
     print("-" * 70)
     from torch.utils.data import DataLoader
 
     loader = DataLoader(
         train_dataset,
-        batch_size=1,      # CRITICAL: L=1 constraint
+        batch_size=32,     # 32 parallel sequences
         shuffle=False,     # CRITICAL: preserve temporal order
         num_workers=0      # Avoid multiprocessing issues
     )

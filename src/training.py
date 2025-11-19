@@ -4,11 +4,17 @@ Training Module for LSTM Frequency Extraction
 This module implements the StatefulTrainer class which handles the CRITICAL
 L=1 training pattern with proper LSTM state management.
 
-CRITICAL CONCEPT - State Preservation Pattern:
-    The trainer implements the key pedagogical concept of this assignment:
-    processing samples individually (L=1) while preserving LSTM state across
-    the sequence. This requires careful state detachment to prevent memory
-    explosion while maintaining temporal learning capability.
+IMPORTANT: L=1 refers to sequence_length=1, NOT num_layers=1. The num_layers
+parameter is experimentally tunable.
+
+CRITICAL CONCEPT - The Pedagogical "Trick":
+    PyTorch LSTM would normally reset the hidden state between samples when
+    sequence_length=1. This trainer implements the key pedagogical concept:
+    manually preserving LSTM state across all 10,000 samples to create an
+    "effective temporal window", enabling temporal learning despite L=1.
+
+    This requires careful state detachment after each backward pass to prevent
+    memory explosion while maintaining temporal learning capability.
 
 Reference: prd/03_TRAINING_PIPELINE_PRD.md
 """
@@ -88,6 +94,9 @@ class StatefulTrainer:
         self.device = device
         self.clip_grad_norm = clip_grad_norm
 
+        # Store expected batch size for variable batch handling
+        self.batch_size = train_loader.batch_size
+
         # Training history
         self.history = {
             'train_loss': [],
@@ -99,23 +108,33 @@ class StatefulTrainer:
         print(f"StatefulTrainer initialized:")
         print(f"  Device: {self.device}")
         print(f"  Model parameters: {sum(p.numel() for p in model.parameters()):,}")
-        print(f"  Training samples: {len(train_loader):,}")
+        print(f"  Training samples: {len(train_loader.dataset):,}")
+        print(f"  Batch size: {self.batch_size}")
+        print(f"  Number of batches: {len(train_loader):,}")
         print(f"  Gradient clipping: {clip_grad_norm}")
 
     def train_epoch(self, epoch: int) -> float:
         """
         Train for one epoch with proper state preservation.
 
-        THIS IS THE CRITICAL FUNCTION implementing the L=1 state management pattern.
+        THIS IS THE CRITICAL FUNCTION implementing the L=1 state management pattern
+        with support for variable batch sizes.
 
         State Management Flow:
             1. Initialize hidden_state = None at epoch start
-            2. For each of 40,000 samples:
-                a. Forward pass with previous state
-                b. Compute loss and backward pass
-                c. Update weights
-                d. **CRITICAL**: Detach state from computation graph
+            2. For each batch (batch_size samples):
+                a. Check and adjust hidden state if batch size changes
+                b. Forward pass with previous state
+                c. Compute loss and backward pass
+                d. Update weights
+                e. **CRITICAL**: Detach state from computation graph
             3. State is discarded at epoch end (will reinitialize next epoch)
+
+        Batch Handling:
+            - Works with any batch_size (1, 32, 64, etc.)
+            - Hidden state shape: (num_layers, batch_size, hidden_size)
+            - Each position in batch tracks its own temporal sequence
+            - Handles variable-sized last batch automatically
 
         Args:
             epoch: Current epoch number (for logging)
@@ -124,14 +143,14 @@ class StatefulTrainer:
             float: Average loss for the epoch
 
         Memory Management:
-            The state detachment (step 2d) is CRITICAL. Without it:
-            - Computation graph spans all 40,000 samples
-            - Memory grows linearly: O(n) where n = 40,000
-            - Training crashes with OOM after ~1000-5000 samples
+            The state detachment (step 2e) is CRITICAL. Without it:
+            - Computation graph accumulates across batches
+            - Memory grows linearly with number of batches
+            - Training crashes with OOM
 
             With detachment:
-            - Computation graph only spans current sample
-            - Memory is constant: O(1)
+            - Computation graph only spans current batch
+            - Memory is constant
             - State VALUES preserved, gradient CONNECTIONS severed
         """
         self.model.train()
@@ -156,20 +175,33 @@ class StatefulTrainer:
 
         for batch_idx, (inputs, targets) in enumerate(pbar):
             # Move data to device
-            inputs = inputs.to(self.device)    # Shape: (batch=1, features=5)
-            targets = targets.to(self.device)  # Shape: (batch=1, 1)
+            inputs = inputs.to(self.device)    # Shape: (batch, features=5)
+            targets = targets.to(self.device)  # Shape: (batch, 1)
+
+            # Get current batch size (might be smaller for last batch)
+            current_batch_size = inputs.size(0)
+
+            # ============================================================
+            # CRITICAL: Handle variable batch sizes
+            # ============================================================
+            # Use get_or_reset_hidden to handle cases where batch size changes
+            # (e.g., when the last batch is smaller than batch_size)
+            hidden_state = self.model.get_or_reset_hidden(
+                current_batch_size=current_batch_size,
+                expected_batch_size=self.batch_size,
+                hidden=hidden_state,
+                device=self.device
+            )
 
             # Reshape for LSTM: (batch, seq_len, features)
-            # For L=1: (1, 1, 5)
+            # For L=1: (batch_size, 1, 5)
             inputs = inputs.unsqueeze(1)  # Add sequence dimension
 
             # ============================================================
             # CRITICAL SECTION: State-preserving forward pass
             # ============================================================
 
-            # Forward pass with previous state
-            # - First iteration: hidden_state is None, LSTM initializes to zeros
-            # - Subsequent iterations: hidden_state contains previous (h, c)
+            # Forward pass with state from get_or_reset_hidden
             output, hidden_state = self.model(inputs, hidden_state)
 
             # Compute loss
@@ -369,10 +401,10 @@ def main():
     print("Creating dataset and loader...")
     dataset = FrequencyDataset('data/train_data.npy')
 
-    # CRITICAL: L=1 configuration
+    # L=1 configuration with batch_size=32
     loader = DataLoader(
         dataset,
-        batch_size=1,      # CRITICAL: L=1 constraint
+        batch_size=32,     # 32 parallel sequences
         shuffle=False,     # CRITICAL: preserve temporal order
         num_workers=0      # Avoid multiprocessing issues
     )
@@ -382,7 +414,7 @@ def main():
     print("Creating model...")
     model = FrequencyLSTM(
         input_size=5,
-        hidden_size=64,
+        hidden_size=128,
         num_layers=1
     )
     print(model.get_model_summary())
@@ -408,8 +440,8 @@ def main():
     print("  ⚠️  to validate the state management implementation")
     print()
     print("The lstm-state-debugger will verify:")
-    print("  1. State detachment occurs after backward() - line 178")
-    print("  2. State is preserved between samples - line 162")
+    print("  1. State detachment occurs after backward() - line 214")
+    print("  2. State is preserved between samples - line 173")
     print("  3. No memory leaks from computation graph accumulation")
     print("  4. Gradient flow is correct")
     print()

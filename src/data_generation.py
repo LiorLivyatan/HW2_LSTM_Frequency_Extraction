@@ -130,7 +130,7 @@ class SignalGenerator:
         for i, t in enumerate(t_array):
             # Generate random amplitude and phase for THIS specific sample
             A_t = np.random.uniform(0.8, 1.2)
-            phi_t = np.random.uniform(0, 2 * np.pi)
+            phi_t = np.random.uniform(0, 0.01 * 2 * np.pi)
 
             # Compute noisy sinusoid at time t
             noisy_signal[i] = A_t * np.sin(2 * np.pi * freq * t + phi_t)

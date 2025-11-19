@@ -252,15 +252,18 @@ def phase_evaluation(config: dict):
     train_dataset = FrequencyDataset(config['paths']['train_data'])
     test_dataset = FrequencyDataset(config['paths']['test_data'])
 
+    # Use same batch size as training for consistency
+    batch_size = config['training']['batch_size']
+
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
-        batch_size=1,
+        batch_size=batch_size,
         shuffle=False,
         num_workers=0
     )
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
-        batch_size=1,
+        batch_size=batch_size,
         shuffle=False,
         num_workers=0
     )

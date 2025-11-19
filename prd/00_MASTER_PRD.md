@@ -38,9 +38,12 @@ Given a noisy mixed signal S(t) composed of 4 ideal sinusoidal frequencies (1Hz,
 
 ### Assignment Context
 This is a **conditional regression** problem with a critical pedagogical constraint:
-- **Sequence Length L = 1** (default): Each sample processed individually
-- **State Preservation**: LSTM internal state (h_t, c_t) must be preserved across samples
-- **Purpose**: Demonstrate LSTM's temporal learning capability through internal memory
+- **Sequence Length L = 1**: Each sample is one time point, processed individually per forward pass
+  - **Important**: L=1 refers to `sequence_length=1`, NOT `num_layers=1`
+  - **num_layers** (stacked LSTM layers) is experimentally tunable (try 1, 2, 3, etc.)
+- **The Pedagogical "Trick"**: PyTorch LSTM would normally reset state between samples at L=1, but we manually preserve state to create an effective temporal window
+- **State Preservation**: LSTM internal state (h_t, c_t) must be manually preserved across all 10,000 samples
+- **Purpose**: Demonstrate LSTM's temporal learning capability through explicit state management
 
 ---
 
@@ -314,7 +317,9 @@ Keras/TensorFlow abstract state management, making the L=1 constraint harder to 
 
 ### 1. Proper State Management (THE KEY FACTOR)
 
-**The Challenge**: With L=1, each sample is processed individually, but temporal dependencies must be learned through internal state.
+**The Challenge**: With L=1 (sequence_length=1), PyTorch LSTM would **normally reset the hidden state** between each sample, destroying temporal continuity. Our task is to manually override this default behavior.
+
+**The Pedagogical "Trick"**: By manually preserving and passing the state across all 10,000 samples, we create an "effective temporal window" that enables temporal learning despite L=1.
 
 **The Solution**:
 ```python
@@ -322,7 +327,7 @@ Keras/TensorFlow abstract state management, making the L=1 constraint harder to 
 hidden_state = None  # Initialize once per epoch
 
 for sample_idx, (input, target) in enumerate(dataloader):
-    # Forward pass with previous state
+    # Forward pass with previous state (MANUAL state passing)
     output, hidden_state = model(input, hidden_state)
 
     # Compute loss and update weights
@@ -331,13 +336,16 @@ for sample_idx, (input, target) in enumerate(dataloader):
     optimizer.step()
 
     # CRITICAL: Detach state from computation graph
+    # Preserves VALUES but breaks gradient connections
     hidden_state = tuple(h.detach() for h in hidden_state)
 ```
 
 **Why This Matters**:
-- Without state preservation: No temporal learning possible
-- Without state detachment: Memory explosion after thousands of samples
-- This is the pedagogical focus of the assignment
+- **PyTorch default at L=1**: Would reset state every sample (no temporal learning)
+- **Manual state preservation**: Creates effective window of 10,000 consecutive time points
+- **State detachment**: Prevents memory explosion from 40,000-step backprop chain
+- **Pedagogical goal**: Understanding LSTM state by manually managing it
+- This manual state management is the core pedagogical focus of the assignment
 
 ### 2. Per-Sample Randomization
 

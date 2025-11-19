@@ -24,6 +24,11 @@
 
 Implement the training pipeline with **proper LSTM state management for L=1**.
 
+**IMPORTANT CLARIFICATION**:
+- **L=1** refers to `sequence_length=1` (each sample is one time point)
+- **L=1 does NOT constrain `num_layers`** (number of stacked LSTM layers)
+- You can experiment with `num_layers=1, 2, 3, etc.`
+
 ### What This Phase Delivers
 - **StatefulTrainer** class with correct state preservation
 - **Custom training loop** handling L=1 constraint
@@ -33,8 +38,10 @@ Implement the training pipeline with **proper LSTM state management for L=1**.
 
 ### Why This Phase is CRITICAL
 - **State preservation is THE KEY** to making L=1 work
+- PyTorch LSTM would normally **reset state between samples at L=1**
+- We must **manually preserve state** to create an effective temporal window
 - Without correct implementation, the model cannot learn temporal patterns
-- This is the pedagogical focus of the entire assignment
+- This manual state management is the pedagogical focus of the entire assignment
 - Most complex phase requiring deep understanding of LSTM internals
 
 ---
@@ -52,10 +59,16 @@ Implement the training pipeline with **proper LSTM state management for L=1**.
   - num_workers = 0 (avoid multiprocessing complications)
 
 #### FR2: State Management (CRITICAL!)
+
+**The Challenge**: PyTorch LSTM with L=1 (sequence_length=1) would normally reset the hidden state between each sample, preventing temporal learning. We must **manually override** this default behavior.
+
+**The Solution**: Manual state preservation creates an "effective temporal window" of 10,000 samples per frequency.
+
+**Requirements**:
 - [ ] **Initialize state ONCE** at epoch start (or None)
-- [ ] **Preserve state** across all 40,000 samples in epoch
-- [ ] **Detach state** from computation graph after each backward pass
-- [ ] **Never reset state** between consecutive samples
+- [ ] **Preserve state** across all 40,000 samples in epoch by passing it to next forward pass
+- [ ] **Detach state** from computation graph after each backward pass (prevents memory explosion)
+- [ ] **Never reset state** between consecutive samples (this is the "trick")
 - [ ] **Reset state** at start of each new epoch
 
 #### FR3: Training Loop

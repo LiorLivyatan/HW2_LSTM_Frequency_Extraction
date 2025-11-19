@@ -4,6 +4,9 @@ Evaluation Module for LSTM Frequency Extraction
 This module provides the Evaluator class for calculating MSE metrics and
 verifying generalization of the trained LSTM model.
 
+IMPORTANT: Evaluation uses the same L=1 state preservation pattern as training,
+where hidden state is manually preserved across all samples in the dataset.
+
 Reference: prd/04_EVALUATION_PRD.md
 """
 
@@ -29,7 +32,7 @@ class Evaluator:
         device: Device for inference ('cpu' or 'cuda')
 
     Example:
-        >>> model = FrequencyLSTM(hidden_size=64)
+        >>> model = FrequencyLSTM(hidden_size=128)
         >>> checkpoint = torch.load('models/best_model.pth')
         >>> model.load_state_dict(checkpoint['model_state_dict'])
         >>> evaluator = Evaluator(model)
@@ -71,11 +74,12 @@ class Evaluator:
 
         CRITICAL: Uses same state preservation pattern as training:
         - Initialize hidden_state = None at start
-        - Preserve state across all samples
+        - Preserve state across all batches
+        - Handle variable batch sizes
         - Detach state after each forward pass
 
         Args:
-            dataloader: DataLoader (batch_size=1, shuffle=False)
+            dataloader: DataLoader (any batch_size, shuffle=False)
             dataset_name: Name for progress bar
 
         Returns:
@@ -90,6 +94,7 @@ class Evaluator:
 
         # Initialize state (same as training)
         hidden_state = None
+        batch_size = dataloader.batch_size
 
         # Progress bar
         pbar = tqdm(
@@ -103,8 +108,19 @@ class Evaluator:
             inputs = inputs.to(self.device)
             targets = targets.to(self.device)
 
+            # Get current batch size (might be smaller for last batch)
+            current_batch_size = inputs.size(0)
+
+            # Handle variable batch sizes
+            hidden_state = self.model.get_or_reset_hidden(
+                current_batch_size=current_batch_size,
+                expected_batch_size=batch_size,
+                hidden=hidden_state,
+                device=self.device
+            )
+
             # Reshape for LSTM: (batch, seq_len, features)
-            inputs = inputs.unsqueeze(1)  # (1, 1, 5)
+            inputs = inputs.unsqueeze(1)  # (batch_size, 1, 5)
 
             # Forward pass with state preservation
             output, hidden_state = self.model(inputs, hidden_state)
@@ -398,11 +414,11 @@ def main():
     from src.model import FrequencyLSTM
     from src.dataset import FrequencyDataset
 
-    # Load model
+    # Load model (using default hidden_size=128 from model definition)
     print("Loading trained model...")
     model = FrequencyLSTM(
         input_size=5,
-        hidden_size=128,  # Use hidden_size from latest training
+        hidden_size=128,
         num_layers=1
     )
 
@@ -424,14 +440,14 @@ def main():
     # Create DataLoaders
     train_loader = DataLoader(
         train_dataset,
-        batch_size=1,
+        batch_size=32,
         shuffle=False,
         num_workers=0
     )
 
     test_loader = DataLoader(
         test_dataset,
-        batch_size=1,
+        batch_size=32,
         shuffle=False,
         num_workers=0
     )
