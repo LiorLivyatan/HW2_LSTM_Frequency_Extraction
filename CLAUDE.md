@@ -10,19 +10,19 @@ This is an M.Sc. assignment for developing an LSTM system to extract individual 
 
 ### How to Use This Repository
 
-**IMPORTANT: This codebase follows a PRD-driven development approach.**
+**IMPORTANT: This codebase follows a documentation-driven development approach.**
 
-The `prd/` folder contains detailed Product Requirements Documents for each phase. **These PRDs are your primary implementation guides** - they contain:
-- Complete architectural specifications with code examples
-- Testing strategies and validation methods
-- Success criteria and common pitfalls
-- Estimated time for each phase
+The `docs/` folder contains comprehensive documentation:
+- **`docs/PRD.md`** - Main Product Requirements Document with goals, metrics, and acceptance criteria
+- **`docs/ARCHITECTURE.md`** - System architecture with C4 diagrams and ADRs
+- **`docs/DATA_GENERATION.md`** through **`docs/INTEGRATION.md`** - Implementation guides
+- **`docs/RESEARCH_AND_EXPERIMENTS.md`** - Experimental results and research notes
 
-**Before implementing any phase, read its corresponding PRD first:**
-- Starting? Read `prd/00_MASTER_PRD.md` for architecture overview
-- Implementing Phase X? Read `prd/0X_*_PRD.md` for detailed specs
+**Before implementing any phase, read the corresponding guide:**
+- Starting? Read `docs/ARCHITECTURE.md` for system architecture overview
+- See `tests/` folder for comprehensive test suite (97% coverage)
 
-This CLAUDE.md provides quick reference for critical concepts, but the PRDs contain the complete implementation details.
+This CLAUDE.md provides quick reference for critical concepts, but the implementation guides contain the complete details.
 
 ---
 
@@ -105,53 +105,18 @@ Rows 30,000-39,999: frequency f₄ (7Hz)
 
 ### Phase-Based Development with PRD Guidance
 
-**IMPORTANT**: The project is organized into 6 phases. Each phase has a detailed PRD (Product Requirements Document) in the `prd/` folder that contains:
-- Complete implementation specifications
-- Architecture diagrams and code examples
-- Testing strategies
-- Success criteria
-- Common pitfalls and mitigation strategies
+**IMPORTANT**: The project is organized into 6 phases. Each phase has a detailed guide in the `docs/` folder.
 
-**When implementing each phase, ALWAYS read the corresponding PRD first.**
+**When implementing each phase, ALWAYS read the corresponding guide first.**
 
-1. **Phase 1: Data Generation** (2-3 hours)
-   - **Read**: `prd/01_DATA_GENERATION_PRD.md`
-   - Generate `data/train_data.npy` and `data/test_data.npy`
-   - Validate with FFT to ensure correct frequencies
-   - Follow SignalGenerator class specification exactly
+1. **Phase 1: Data Generation** - Read `docs/DATA_GENERATION.md`
+2. **Phase 2: Model Architecture** - Read `docs/MODEL_ARCHITECTURE.md`
+3. **Phase 3: Training Pipeline** ⭐ **CRITICAL** - Read `docs/TRAINING_PIPELINE.md`
+4. **Phase 4: Evaluation** - Read `docs/EVALUATION.md`
+5. **Phase 5: Visualization** - Read `docs/VISUALIZATION.md`
+6. **Phase 6: Integration** - Read `docs/INTEGRATION.md`
 
-2. **Phase 2: Model Architecture** (1-2 hours)
-   - **Read**: `prd/02_MODEL_ARCHITECTURE_PRD.md`
-   - Build `FrequencyLSTM` class in `src/model.py`
-   - Test with dummy data before training
-   - Verify state shapes and parameter count
-
-3. **Phase 3: Training Pipeline** (4-6 hours) ⭐ **MOST CRITICAL**
-   - **Read**: `prd/03_TRAINING_PIPELINE_PRD.md` (READ CAREFULLY!)
-   - Implement `StatefulTrainer` in `src/training.py`
-   - Get state preservation pattern exactly right
-   - Monitor for memory leaks
-   - This PRD contains the critical state detachment pattern
-
-4. **Phase 4: Evaluation** (1-2 hours)
-   - **Read**: `prd/04_EVALUATION_PRD.md`
-   - Calculate MSE on train and test sets
-   - Verify generalization: MSE_test ≈ MSE_train
-   - Follow Evaluator class specification
-
-5. **Phase 5: Visualization** (2-3 hours)
-   - **Read**: `prd/05_VISUALIZATION_PRD.md`
-   - Create Graph 1: Single frequency comparison (Target vs LSTM vs Noisy)
-   - Create Graph 2: All 4 frequencies (2×2 grid)
-   - Use exact graph specifications from PRD
-
-6. **Phase 6: Integration** (1-2 hours)
-   - **Read**: `prd/06_INTEGRATION_PRD.md`
-   - Build `main.py` orchestration script
-   - Add CLI with argparse
-   - Follow configuration structure from PRD
-
-**Architecture Overview**: Before starting, read `prd/00_MASTER_PRD.md` for the complete system architecture and technology stack decisions.
+**Architecture Overview**: Before starting, read `docs/ARCHITECTURE.md` for complete system architecture.
 
 ### Recommended Development Order
 
@@ -247,11 +212,18 @@ train_loader = DataLoader(
 
 ```
 HW2/
-├── prd/                    # Product Requirements Documents (design specs)
-│   ├── 00_MASTER_PRD.md    # Start here for architecture overview
-│   ├── 01-06_*.md          # Phase-specific detailed specs
+├── docs/                       # All documentation
+│   ├── PRD.md                  # Main Product Requirements Document
+│   ├── ARCHITECTURE.md         # System architecture and ADRs
+│   ├── DATA_GENERATION.md      # Data generation guide
+│   ├── MODEL_ARCHITECTURE.md   # Model design guide
+│   ├── TRAINING_PIPELINE.md    # Training guide (CRITICAL)
+│   ├── EVALUATION.md           # Evaluation guide
+│   ├── VISUALIZATION.md        # Visualization guide
+│   ├── INTEGRATION.md          # Integration guide
+│   └── RESEARCH_AND_EXPERIMENTS.md  # Experiments and research
 │
-├── src/                    # Implementation (to be created)
+├── src/                    # Implementation
 │   ├── data_generation.py  # SignalGenerator class
 │   ├── dataset.py          # PyTorch Dataset wrapper
 │   ├── model.py            # FrequencyLSTM class
@@ -259,12 +231,13 @@ HW2/
 │   ├── evaluation.py       # Evaluator class
 │   └── visualization.py    # Visualizer class
 │
+├── tests/                  # Unit tests (97% coverage)
 ├── data/                   # Generated datasets
 ├── models/                 # Saved checkpoints
 ├── outputs/                # Results (metrics, graphs, predictions)
-├── tests/                  # Unit tests
 │
 ├── main.py                 # Orchestration script
+├── run_experiments.py      # Hyperparameter experiments
 ├── config.yaml             # Hyperparameters
 ├── ASSIGNMENT_REQUIREMENTS.md  # Assignment specs in English
 └── CLAUDE.md               # This file
@@ -288,18 +261,21 @@ HW2/
 
 ### Documentation References
 
-**Primary Implementation Guides** (use these when coding):
-- `prd/00_MASTER_PRD.md` - System architecture overview and technology decisions
-- `prd/01_DATA_GENERATION_PRD.md` - Complete data generation specification
-- `prd/02_MODEL_ARCHITECTURE_PRD.md` - LSTM model design and structure
-- `prd/03_TRAINING_PIPELINE_PRD.md` - Training loop with state management (CRITICAL!)
-- `prd/04_EVALUATION_PRD.md` - Metrics calculation and generalization testing
-- `prd/05_VISUALIZATION_PRD.md` - Graph creation specifications
-- `prd/06_INTEGRATION_PRD.md` - End-to-end pipeline orchestration
+**Main Documentation** (start here):
+- `docs/PRD.md` - Complete PRD with goals, metrics, requirements
+- `docs/ARCHITECTURE.md` - System architecture, C4 diagrams, ADRs
+
+**Implementation Guides** (use these when coding):
+- `docs/DATA_GENERATION.md` - Data generation specification
+- `docs/MODEL_ARCHITECTURE.md` - LSTM model design
+- `docs/TRAINING_PIPELINE.md` - Training with state management (CRITICAL!)
+- `docs/EVALUATION.md` - Metrics and generalization testing
+- `docs/VISUALIZATION.md` - Graph creation specifications
+- `docs/INTEGRATION.md` - End-to-end pipeline
+- `docs/RESEARCH_AND_EXPERIMENTS.md` - Experimental results
 
 **Assignment Context**:
 - `ASSIGNMENT_REQUIREMENTS.md` - Original assignment translated from Hebrew
-- `L2-homework.pdf` - Original Hebrew assignment document
 
 ---
 

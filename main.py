@@ -383,12 +383,7 @@ def phase_visualization(config: dict):
     )
 
     # Create graphs
-    visualizer.create_all_visualizations(
-        output_dir=viz_config['output_dir'],
-        freq_idx=viz_config.get('comparison_freq_idx', 1),
-        time_window=viz_config.get('time_window', 1000),
-        dpi=viz_config.get('dpi', 300)
-    )
+    visualizer.create_all_visualizations(output_dir=viz_config['output_dir'])
 
     logging.info("✓ Visualization complete\n")
 

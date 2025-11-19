@@ -165,3 +165,118 @@ State shapes (for batch_size=1):
 2025-11-19 18:54:42,515 [INFO] PIPELINE COMPLETE
 2025-11-19 18:54:42,515 [INFO] End time: 2025-11-19 18:54:42
 2025-11-19 18:54:42,515 [INFO] ======================================================================
+2025-11-19 21:34:12,862 [INFO] ======================================================================
+2025-11-19 21:34:12,862 [INFO] LSTM Frequency Extraction System
+2025-11-19 21:34:12,862 [INFO] ======================================================================
+2025-11-19 21:34:12,862 [INFO] Mode: all
+2025-11-19 21:34:12,862 [INFO] Configuration: config.yaml
+2025-11-19 21:34:12,862 [INFO] Start time: 2025-11-19 21:34:12
+2025-11-19 21:34:12,862 [INFO] ======================================================================
+2025-11-19 21:34:12,862 [INFO] 
+2025-11-19 21:34:12,863 [INFO] ======================================================================
+2025-11-19 21:34:12,863 [INFO] PHASE 1: Data Generation
+2025-11-19 21:34:12,863 [INFO] ======================================================================
+2025-11-19 21:34:12,863 [INFO] Generating training set (Seed #1)...
+2025-11-19 21:34:13,017 [INFO] Generating test set (Seed #2)...
+2025-11-19 21:34:13,169 [INFO] ✓ Data generation complete
+
+2025-11-19 21:34:13,171 [INFO] ======================================================================
+2025-11-19 21:34:13,171 [INFO] PHASE 2 & 3: Model Training
+2025-11-19 21:34:13,171 [INFO] ======================================================================
+2025-11-19 21:34:13,171 [INFO] Using device: cpu
+2025-11-19 21:34:13,177 [INFO] ============================================================
+FrequencyLSTM Model Summary
+============================================================
+Input size:       5
+Hidden size:      128
+Num layers:       1
+Dropout:          0.0
+Output size:      1
+------------------------------------------------------------
+LSTM parameters:  69,120
+FC parameters:    129
+Total parameters: 69,249
+============================================================
+
+Architecture:
+  Input (5) → LSTM (128) → FC (1) → Output
+
+State shapes (for batch_size=1):
+  Hidden state: (1, 1, 128)
+  Cell state:   (1, 1, 128)
+============================================================
+2025-11-19 21:36:03,862 [INFO] ✓ Training complete
+
+2025-11-19 21:36:03,862 [INFO] ======================================================================
+2025-11-19 21:36:03,862 [INFO] PHASE 4: Evaluation
+2025-11-19 21:36:03,862 [INFO] ======================================================================
+2025-11-19 21:36:03,868 [INFO] Loaded model from epoch 93
+2025-11-19 21:36:04,609 [INFO] ✓ Evaluation complete
+
+2025-11-19 21:36:04,610 [INFO] ======================================================================
+2025-11-19 21:36:04,610 [INFO] PHASE 5: Visualization
+2025-11-19 21:36:04,610 [INFO] ======================================================================
+2025-11-19 21:36:04,612 [ERROR] 
+
+Error: Visualizer.create_all_visualizations() got an unexpected keyword argument 'freq_idx'
+Traceback (most recent call last):
+  File "/Users/asifamar/Desktop/Master/llm with agents/HW2_LSTM_Frequency_Extraction/main.py", line 486, in main
+    phase_visualization(config)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/asifamar/Desktop/Master/llm with agents/HW2_LSTM_Frequency_Extraction/main.py", line 386, in phase_visualization
+    visualizer.create_all_visualizations(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        output_dir=viz_config['output_dir'],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        dpi=viz_config.get('dpi', 300)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+TypeError: Visualizer.create_all_visualizations() got an unexpected keyword argument 'freq_idx'
+2025-11-19 21:36:12,029 [INFO] ======================================================================
+2025-11-19 21:36:12,030 [INFO] LSTM Frequency Extraction System
+2025-11-19 21:36:12,030 [INFO] ======================================================================
+2025-11-19 21:36:12,030 [INFO] Mode: viz
+2025-11-19 21:36:12,030 [INFO] Configuration: config.yaml
+2025-11-19 21:36:12,030 [INFO] Start time: 2025-11-19 21:36:12
+2025-11-19 21:36:12,030 [INFO] ======================================================================
+2025-11-19 21:36:12,030 [INFO] 
+2025-11-19 21:36:12,031 [INFO] ======================================================================
+2025-11-19 21:36:12,031 [INFO] PHASE 5: Visualization
+2025-11-19 21:36:12,031 [INFO] ======================================================================
+2025-11-19 21:36:12,033 [ERROR] 
+
+Error: Visualizer.create_all_visualizations() got an unexpected keyword argument 'freq_idx'
+Traceback (most recent call last):
+  File "/Users/asifamar/Desktop/Master/llm with agents/HW2_LSTM_Frequency_Extraction/main.py", line 486, in main
+    phase_visualization(config)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/asifamar/Desktop/Master/llm with agents/HW2_LSTM_Frequency_Extraction/main.py", line 386, in phase_visualization
+    visualizer.create_all_visualizations(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        output_dir=viz_config['output_dir'],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        dpi=viz_config.get('dpi', 300)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+TypeError: Visualizer.create_all_visualizations() got an unexpected keyword argument 'freq_idx'
+2025-11-19 21:36:37,038 [INFO] ======================================================================
+2025-11-19 21:36:37,038 [INFO] LSTM Frequency Extraction System
+2025-11-19 21:36:37,038 [INFO] ======================================================================
+2025-11-19 21:36:37,038 [INFO] Mode: viz
+2025-11-19 21:36:37,039 [INFO] Configuration: config.yaml
+2025-11-19 21:36:37,039 [INFO] Start time: 2025-11-19 21:36:37
+2025-11-19 21:36:37,039 [INFO] ======================================================================
+2025-11-19 21:36:37,039 [INFO] 
+2025-11-19 21:36:37,040 [INFO] ======================================================================
+2025-11-19 21:36:37,040 [INFO] PHASE 5: Visualization
+2025-11-19 21:36:37,040 [INFO] ======================================================================
+2025-11-19 21:36:40,985 [INFO] ✓ Visualization complete
+
+2025-11-19 21:36:40,985 [INFO] ======================================================================
+2025-11-19 21:36:40,985 [INFO] PIPELINE COMPLETE
+2025-11-19 21:36:40,985 [INFO] End time: 2025-11-19 21:36:40
+2025-11-19 21:36:40,985 [INFO] ======================================================================
