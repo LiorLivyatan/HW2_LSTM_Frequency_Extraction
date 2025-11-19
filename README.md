@@ -1433,30 +1433,16 @@ pip install torch numpy matplotlib scipy pyyaml
 python main.py --mode all
 ```
 
-This runs:
-1. Data generation (train + test sets)
-2. Model training (100 epochs)
-3. Evaluation (MSE metrics)
-4. Visualization (11 graphs)
-5. Table generation (3 markdown tables)
 
-#### Individual Modes
+# Run everything AND launch the UI afterwards
+python main.py --mode all --launch-ui
 
-```bash
-# Generate datasets only
-python main.py --mode data
-
-# Train model only
-python main.py --mode train
-
-# Evaluate existing model
-python main.py --mode eval
-
-# Create visualizations only
-python main.py --mode viz
-
-# Generate tables only
-python main.py --mode tables
+# Run specific phases
+python main.py --mode data   # Generate datasets
+python main.py --mode train  # Train model
+python main.py --mode eval   # Evaluate model
+python main.py --mode viz    # Generate static graphs
+python main.py --mode ui     # Launch UI Dashboard only
 ```
 
 #### Custom Configuration

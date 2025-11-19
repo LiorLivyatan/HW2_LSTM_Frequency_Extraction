@@ -500,6 +500,12 @@ Examples:
         help='Enable verbose logging'
     )
 
+    parser.add_argument(
+        '--launch-ui',
+        action='store_true',
+        help='Automatically launch the Streamlit UI after the pipeline completes'
+    )
+
     args = parser.parse_args()
 
     # Load configuration
@@ -553,7 +559,8 @@ Examples:
             if not run_phase(phase_visualization, config, "Visualization"):
                 success = False
         
-        if success and args.mode == 'ui':
+        # Run UI if explicitly in 'ui' mode OR if --launch-ui flag is set
+        if success and (args.mode == 'ui' or args.launch_ui):
             if not run_phase(phase_ui, config, "UI Dashboard"):
                 success = False
 
