@@ -30,7 +30,13 @@ This CLAUDE.md provides quick reference for critical concepts, but the PRDs cont
 
 ### The L=1 State Preservation Pattern (MOST CRITICAL)
 
-This assignment has a **pedagogical constraint**: Sequence Length L=1, meaning each sample is processed individually. The LSTM must learn temporal patterns through internal state preservation, NOT through batched sequences.
+This assignment has a **pedagogical constraint**: **Sequence Length L=1**, meaning each sample is processed individually (one time point per forward pass).
+
+**IMPORTANT**: L=1 refers to `sequence_length=1`, NOT `num_layers=1`. The number of stacked LSTM layers (`num_layers`) is **experimentally tunable** (try 1, 2, 3, etc.).
+
+**The Pedagogical "Trick":**
+
+With L=1, PyTorch's LSTM would **normally reset the hidden state** between each sample, destroying temporal continuity. The assignment's challenge is to **manually preserve the state** across all 10,000 samples, creating an "effective temporal window" through explicit state management rather than batched sequences.
 
 **Correct Implementation Pattern:**
 ```python
@@ -38,7 +44,7 @@ This assignment has a **pedagogical constraint**: Sequence Length L=1, meaning e
 hidden_state = None  # Initialize ONCE per epoch
 
 for sample in dataloader:
-    # Forward pass with previous state
+    # Forward pass with previous state (MANUAL state passing)
     output, hidden_state = model(input, hidden_state)
 
     # Backward pass
@@ -52,9 +58,11 @@ for sample in dataloader:
 ```
 
 **Why this matters:**
-- Without state preservation: Model cannot learn temporal patterns
-- Without state detachment: Memory explosion after thousands of samples
-- This is THE KEY to making L=1 work and is the assignment's pedagogical focus
+- **PyTorch default behavior at L=1**: Would reset state between samples (no temporal learning)
+- **Manual state preservation**: Creates effective window of 10,000 consecutive samples
+- **State detachment**: Prevents memory explosion from 40,000-step backprop chain
+- **Pedagogical goal**: Understanding LSTM internal state by manually managing it
+- This is THE KEY to making L=1 work and is the assignment's core challenge
 
 ### Per-Sample Randomization (CRITICAL)
 
@@ -189,19 +197,26 @@ python main.py --mode all
 
 ### DataLoader Configuration
 ```python
-# CRITICAL: batch_size=1, shuffle=False
+# IMPORTANT: shuffle=False to preserve temporal order
 train_loader = DataLoader(
     dataset,
-    batch_size=1,      # Required for L=1
-    shuffle=False,     # Preserve temporal order
+    batch_size=32,     # Can be any size (1, 32, 64, etc.)
+    shuffle=False,     # CRITICAL: Preserve temporal order
     num_workers=0      # Avoid multiprocessing complications
 )
 ```
 
+**Batch Size Notes:**
+- `batch_size=1`: Sequential processing (simplest, but slower)
+- `batch_size=32`: 32 parallel sequences (faster training)
+- Hidden state shape adapts: `(num_layers, batch_size, hidden_size)`
+- Each batch position tracks its own temporal sequence
+- Variable batch sizes (e.g., last batch) handled automatically
+
 ### Model Input/Output Shapes
-- **Input**: `(batch=1, seq_len=1, features=5)` - reshaped from (1, 5)
-- **Output**: `(batch=1, 1)` - scalar prediction
-- **Hidden state**: `(num_layers, batch=1, hidden_size)` - typically (1, 1, 64)
+- **Input**: `(batch, seq_len=1, features=5)` - e.g., (32, 1, 5) for batch_size=32
+- **Output**: `(batch, 1)` - e.g., (32, 1) for batch_size=32
+- **Hidden state**: `(num_layers, batch, hidden_size)` - e.g., (1, 32, 128) for single-layer with batch_size=32
 
 ### Evaluation Requirements
 - MSE_train: Performance on Seed #1 data

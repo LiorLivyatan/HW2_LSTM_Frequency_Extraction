@@ -1,0 +1,210 @@
+{
+  "metadata": {
+    "project": "HW2_LSTM_Frequency_Extraction",
+    "created": "2025-11-16",
+    "version": "1.0",
+    "description": "Registry of all available agents for the LSTM frequency extraction project"
+  },
+  "system_agents": {
+    "general-purpose": {
+      "type": "built-in",
+      "description": "General-purpose agent for researching complex questions, searching for code, and executing multi-step tasks",
+      "capabilities": [
+        "Multi-step task execution",
+        "Complex research",
+        "Code search and analysis",
+        "File operations"
+      ],
+      "when_to_use": "Default choice for most coding tasks, file operations, and general development work",
+      "status": "available"
+    },
+    "Explore": {
+      "type": "built-in",
+      "description": "Fast agent specialized for exploring codebases",
+      "capabilities": [
+        "File pattern matching (e.g., 'src/**/*.py')",
+        "Keyword search across codebase",
+        "Quick codebase navigation",
+        "Architecture understanding"
+      ],
+      "thoroughness_levels": ["quick", "medium", "very thorough"],
+      "when_to_use": "When you need to quickly find files, search for keywords, or understand codebase structure",
+      "status": "available"
+    },
+    "Plan": {
+      "type": "built-in",
+      "description": "Fast agent specialized for planning and analysis without execution",
+      "capabilities": [
+        "Task planning",
+        "Research without modifications",
+        "Architecture analysis",
+        "Requirement gathering"
+      ],
+      "thoroughness_levels": ["quick", "medium", "very thorough"],
+      "when_to_use": "When you need to plan implementation steps or gather information without making changes",
+      "status": "available"
+    }
+  },
+  "custom_agents": {
+    "signal-validation-expert": {
+      "type": "custom",
+      "phase": "Phase 1",
+      "description": "Signal processing expert for validating synthetic signal generation",
+      "specialization": "Data generation validation for LSTM frequency extraction",
+      "capabilities": [
+        "Per-sample randomization verification (A_i(t), φ_i(t))",
+        "FFT analysis for frequency content validation",
+        "Seed separation checks (train vs test)",
+        "Dataset structure validation (40,000 rows, correct shape)",
+        "Noisy vs clean signal comparison"
+      ],
+      "prd_reference": "prd/01_DATA_GENERATION_PRD.md",
+      "when_to_use": [
+        "After implementing signal generation code",
+        "When modifying data generation functions",
+        "To validate train_data.npy and test_data.npy",
+        "When debugging frequency content issues"
+      ],
+      "critical_checks": [
+        "Randomization happens in loop over samples (NOT vectorized)",
+        "All 4 frequencies (1Hz, 3Hz, 5Hz, 7Hz) present in FFT",
+        "Different seeds produce different noise patterns",
+        "Dataset has exactly 40,000 rows"
+      ],
+      "output_format": {
+        "validation_summary": "PASS/FAIL",
+        "per_sample_randomization": "PASS/FAIL",
+        "frequency_content": "PASS/FAIL with SNR per frequency",
+        "seed_separation": "PASS/FAIL with correlation coefficient",
+        "dataset_structure": "PASS/FAIL"
+      },
+      "status": "available",
+      "model": "sonnet",
+      "config_file": ".claude/agents/signal-validation-expert.md"
+    },
+    "lstm-state-debugger": {
+      "type": "custom",
+      "phase": "Phase 3",
+      "description": "Elite PyTorch LSTM debugging specialist for state management issues",
+      "specialization": "LSTM state preservation and memory leak detection for L=1 training",
+      "capabilities": [
+        "State detachment pattern verification",
+        "State flow tracing across samples",
+        "Memory leak detection",
+        "Gradient flow assessment",
+        "Training stability diagnosis"
+      ],
+      "prd_reference": "prd/03_TRAINING_PIPELINE_PRD.md",
+      "when_to_use": [
+        "After implementing/modifying LSTM training loop",
+        "When encountering memory leaks during training",
+        "When observing training instability",
+        "To verify state preservation between samples",
+        "Before starting training to validate setup"
+      ],
+      "critical_checks": [
+        "hidden_state.detach() called after backward()",
+        "cell_state.detach() called after backward()",
+        "States preserved (not reset) between samples within epoch",
+        "States only initialized/reset at epoch boundaries",
+        "No gradient accumulation from previous samples"
+      ],
+      "output_format": {
+        "state_management_assessment": "Summary of current approach",
+        "issues_identified": "List with code references",
+        "memory_implications": "Impact analysis",
+        "gradient_flow_status": "Assessment",
+        "recommended_fixes": "Concrete code corrections",
+        "verification_steps": "How to confirm fixes"
+      },
+      "status": "available",
+      "model": "sonnet",
+      "config_file": ".claude/agents/lstm-state-debugger.md"
+    },
+    "lstm-training-monitor": {
+      "type": "custom",
+      "phase": "Phase 3",
+      "description": "LSTM training diagnostician for convergence and hyperparameter optimization",
+      "specialization": "Training dynamics analysis and hyperparameter tuning",
+      "capabilities": [
+        "Loss curve analysis (convergence, plateaus, instability)",
+        "Hyperparameter optimization (learning rate, hidden size, etc.)",
+        "Overfitting/underfitting detection",
+        "Gradient explosion/vanishing detection",
+        "Training efficiency optimization"
+      ],
+      "prd_reference": "prd/03_TRAINING_PIPELINE_PRD.md",
+      "when_to_use": [
+        "After completing a training run",
+        "When experiencing training instability (loss jumps)",
+        "When loss plateaus or doesn't improve",
+        "For proactive hyperparameter tuning before training",
+        "When training is slower than expected"
+      ],
+      "critical_checks": [
+        "Loss decreasing appropriately over epochs",
+        "No NaN or Inf values in loss",
+        "Gradient norms stable (not exploding/vanishing)",
+        "Train vs validation loss gap (overfitting check)",
+        "L=1 constraint compatibility"
+      ],
+      "output_format": {
+        "training_status_summary": "Current health assessment",
+        "key_findings": "Prioritized issues",
+        "recommended_actions": "Concrete steps with specific values",
+        "expected_outcomes": "Predicted improvements",
+        "monitoring_plan": "Metrics to track"
+      },
+      "status": "available",
+      "model": "sonnet",
+      "config_file": ".claude/agents/lstm-training-monitor.md"
+    },
+    "lstm-freq-evaluator": {
+      "type": "custom",
+      "phase": "Phase 4",
+      "description": "LSTM performance evaluator for frequency extraction tasks",
+      "specialization": "Metrics interpretation and generalization analysis",
+      "capabilities": [
+        "MSE analysis (train vs test comparison)",
+        "Generalization threshold check (MSE_test ≈ MSE_train)",
+        "Per-frequency performance analysis",
+        "Overfitting/underfitting diagnosis",
+        "Model improvement recommendations"
+      ],
+      "prd_reference": "prd/04_EVALUATION_PRD.md",
+      "when_to_use": [
+        "After model training completes",
+        "When evaluation metrics are available",
+        "To assess generalization quality",
+        "For per-frequency performance analysis",
+        "When model improvements are needed"
+      ],
+      "critical_checks": [
+        "Generalization ratio: 0.90 ≤ (MSE_test / MSE_train) ≤ 1.10",
+        "MSE values within acceptable bounds",
+        "Per-frequency MSE analysis",
+        "Problematic frequencies identified (MSE > 1.5× mean)",
+        "Overall performance vs requirements"
+      ],
+      "output_format": {
+        "performance_summary": {
+          "train_mse": "value",
+          "test_mse": "value",
+          "generalization_ratio": "MSE_test/MSE_train",
+          "generalization_status": "PASS/FAIL"
+        },
+        "detailed_analysis": "Overall performance and per-frequency insights",
+        "recommendations": "2-4 concrete, prioritized actions"
+      },
+      "status": "available",
+      "model": "sonnet",
+      "config_file": ".claude/agents/lstm-freq-evaluator.md"
+    }
+  },
+  "agent_invocation_history": [],
+  "notes": {
+    "usage": "This registry tracks all available agents and their capabilities. Update 'agent_invocation_history' when agents are used.",
+    "maintenance": "Review and update agent status after each phase completion",
+    "priority": "Custom agents should be used for their specialized phases; use system agents for general tasks"
+  }
+}

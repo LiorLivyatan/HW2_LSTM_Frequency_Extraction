@@ -24,6 +24,11 @@
 
 Design and implement the LSTM neural network architecture for conditional frequency extraction.
 
+**IMPORTANT CLARIFICATION**:
+- **L=1** refers to `sequence_length=1` (each forward pass processes one time point)
+- **L=1 does NOT constrain `num_layers`** (number of stacked LSTM layers in the model)
+- The `num_layers` parameter is **fully experimentally tunable** (try 1, 2, 3, 4, etc.)
+
 ### What This Phase Delivers
 - **FrequencyLSTM model** with proper input/output structure
 - **State management** capabilities (critical for L=1)
@@ -57,10 +62,11 @@ Design and implement the LSTM neural network architecture for conditional freque
 - [ ] **No activation function** (regression task)
 
 #### FR3: LSTM Layer
-- [ ] **Configurable hidden size**: Default 64, tunable [32, 64, 128, 256]
-- [ ] **Configurable num layers**: Default 1, tunable [1, 2]
+- [ ] **Configurable hidden size**: Default 128, tunable [32, 64, 128, 256]
+- [ ] **Configurable num layers**: Default 1, tunable [1, 2, 3, 4] (experimentally adjust as needed)
 - [ ] **State outputs**: Must return (h_n, c_n)
 - [ ] **Batch first**: Set batch_first=True for convenience
+- [ ] **Dropout**: Only applied between layers if num_layers > 1
 
 #### FR4: State Management
 - [ ] **State initialization**: Method to create zero states
@@ -372,18 +378,18 @@ assert not torch.equal(hidden[0], hidden_next[0])
 | Hyperparameter | Default | Options | Impact |
 |----------------|---------|---------|--------|
 | **input_size** | 5 | Fixed | Matches data structure |
-| **hidden_size** | 64 | [32, 64, 128, 256] | Capacity vs. speed tradeoff |
-| **num_layers** | 1 | [1, 2, 3] | Depth vs. complexity |
-| **dropout** | 0.0 | [0.0, 0.1, 0.2] | Regularization (if num_layers > 1) |
+| **hidden_size** | 128 | [32, 64, 128, 256] | Capacity vs. speed tradeoff |
+| **num_layers** | 1 | [1, 2, 3, 4, ...] | Depth vs. complexity (fully tunable) |
+| **dropout** | 0.0 | [0.0, 0.1, 0.2, 0.3] | Regularization (only used if num_layers > 1) |
 
 #### Recommended Starting Point
-- **hidden_size**: 64
-  - Sufficient for 4-frequency separation
-  - Not too large to overfit
+- **hidden_size**: 128
+  - Good capacity for 4-frequency separation
+  - Balanced between underfitting and overfitting
 - **num_layers**: 1
-  - Simpler architecture
+  - Simpler architecture to start
   - Easier to debug state management
-  - Can increase if needed
+  - **Feel free to experiment with 2, 3, or 4 layers** for potentially better performance
 
 ---
 

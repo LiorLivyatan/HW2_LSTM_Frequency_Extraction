@@ -1,0 +1,58 @@
+{
+  "_comment": "This is a TEMPLATE for signal-validation-expert agent reports. Copy and fill in actual values.",
+  "agent_name": "signal-validation-expert",
+  "phase": "Phase 1",
+  "execution_timestamp": "YYYY-MM-DDTHH:MM:SSZ",
+  "task_description": "Brief description of validation task",
+  "status": "COMPLETED|IN_PROGRESS|FAILED|BLOCKED",
+  "findings": {
+    "per_sample_randomization": {
+      "status": "PASS|FAIL",
+      "details": "Loop-based or vectorized? Evidence from code analysis"
+    },
+    "frequency_content": {
+      "status": "PASS|FAIL",
+      "detected_frequencies_hz": [1.0, 3.0, 5.0, 7.0],
+      "snr_db": {
+        "1Hz": 0.0,
+        "3Hz": 0.0,
+        "5Hz": 0.0,
+        "7Hz": 0.0
+      }
+    },
+    "seed_separation": {
+      "status": "PASS|FAIL",
+      "train_seed": 1,
+      "test_seed": 2,
+      "noise_correlation": 0.0
+    },
+    "dataset_structure": {
+      "status": "PASS|FAIL",
+      "total_rows": 40000,
+      "shape": [40000, 10000],
+      "has_nan": false,
+      "has_inf": false
+    },
+    "noisy_vs_clean": {
+      "status": "PASS|FAIL",
+      "noise_mean": 0.0,
+      "noise_std": 0.0
+    }
+  },
+  "critical_issues": [
+    "List any blocking issues here (empty array if none)"
+  ],
+  "recommendations": [
+    "Actionable next steps",
+    "Can include 'Proceed to Phase 2' if all checks pass"
+  ],
+  "artifacts_created": [
+    "data/train_data.npy",
+    "data/test_data.npy"
+  ],
+  "artifacts_validated": [
+    "src/data_generation.py"
+  ],
+  "next_agent": "None (ready for Phase 2)|agent-name",
+  "execution_duration": "X minutes"
+}

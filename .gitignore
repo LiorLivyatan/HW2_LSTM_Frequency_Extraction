@@ -24,27 +24,30 @@ wheels/
 *.egg
 
 # PyTorch
-*.pth
-*.pt
-*.ckpt
-checkpoints/
+# *.pth
+# *.pt
+# *.ckpt
+# checkpoints/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
 
 # Data files (large binary files)
-*.npy
-*.npz
-data/
+# *.npy
+# *.npz
+# data/
 
 # Model outputs
-models/
-outputs/
+# models/
+# outputs/
 
 # Logs
-logs/
-*.log
+# logs/
+# *.log
+
+# Agent communication logs (exclude from version control)
+# agent_communication/logs/*.log
 
 # IDE
 .vscode/
